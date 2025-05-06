@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BuffetSense</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: linear-gradient(90deg, #00c6ff, #f3f9a7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: sans-serif;
+    }
+
+    .phone {
+      position: relative;
+      width: 360px;
+      height: 740px;
+      border: 16px solid #1a120b;
+      border-radius: 40px;
+      background: #1a120b;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+
+    .notch {
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 140px; height: 30px;
+      background: #1a120b;
+      border-bottom-left-radius: 14px;
+      border-bottom-right-radius: 14px;
+      z-index: 2;
+    }
+
+    .screen {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #fff8ec;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .status-bar {
+      width: 100%; height: 44px;
+      padding: 0 12px;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #1a120b;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .status-bar .time {
+      font-size: 16px;
+    }
+
+    .status-bar .icons {
+      display: flex; align-items: center; font-size: 16px;
+    }
+
+    .status-bar .icons span {
+      margin-left: 8px;
+    }
+
+    .progress {
+      height: 6px;
+      width: 80%;
+      background: #e0e0e0;
+      overflow: hidden;
+      border-radius: 10px;
+      margin-top: -200px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: #0f5132;
+      transition: width 1s ease;
+    }
+
+    .content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      width: 100%;
+    }
+
+    .logo {
+      width: 200px;
+      transition: all 1s ease;
+      margin-top: 200px;
+    }
+
+    .logo.top {
+      position: absolute;
+      top: 60px;
+      width: 120px;
+      margin: 0;
+    }
+
+    .loader {
+      width: 30px;
+      height: 30px;
+      border: 4px solid #1a120b;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-top: -280px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .text, .input-page, .final-page {
+      display: none;
+      font-size: 14px;
+      text-align: center;
+      width: 100%;
+      padding: 0 20px;
+      margin-top: 40px;
+    }
+
+    .button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+
+    .nav-button {
+      background-color: #0f5132;
+      color: white;
+    }
+
+    .nav-button:hover {
+      background-color: #0b3c24;
+      transform: scale(1.05);
+    }
+
+    .nav-button:active {
+      background-color: #092e1b;
+      transform: scale(0.97);
+    }
+
+    .next-btn {
+      margin-top: 230px;
+      align-self: flex-center;
+      margin-left: 125px;
+    }
+
+    .start-btn {
+      margin-top: 200px;
+    }
+
+    .input-page {
+      align-items: flex-start;
+      text-align: left;
+      padding: 0 20px;
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 40px;
+    }
+
+    .input-page h2 {
+      font-size: 18px;
+      color: #0f5132;
+      margin: 0 0 10px 0;
+      margin-left: 10px;
+    }
+
+    .input-page p.sub {
+      font-size: 14px;
+      margin: 0 0 20px 0;
+      color: #666;
+      margin-left: 10px;
+    }
+
+    .input-page label {
+      font-weight: bold;
+      font-size: 14px;
+      margin-top: 12px;
+      display: block;
+      margin-left: 10px;
+    }
+
+    .input-page input {
+      margin-top: 6px;
+      margin-left: 10px;
+      padding: 10px 14px;
+      font-size: 16px;
+      width: calc(100% - 40px);
+      border: 1px solid #bbb;
+      border-radius: 8px;
+      box-sizing: border-box;
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    .input-page input:focus {
+      border-color: #0f5132;
+      box-shadow: 0 0 0 2px rgba(15, 81, 50, 0.2);
+    }
+
+    .final-page h2 {
+      font-size: 16px;
+      color: #0f5132;
+      font-weight: 600;
+      margin-bottom: 30px;
+    }
+
+    .home-indicator {
+      position: absolute;
+      bottom: 8px; left: 50%;
+      transform: translateX(-50%);
+      width: 120px; height: 5px;
+      background: rgba(26,18,11,0.2);
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="screen">
+      <div class="status-bar">
+        <div class="time" id="clock">--:--:--</div>
+        <div class="icons">
+          <span id="battery-icon">🔋</span>
+          <span id="battery-level">--%</span>
+        </div>
+      </div>
+
+      <img src="buffetsense-logo.png" class="logo" id="logo" />
+
+      <div class="content">
+        <div class="loader" id="loader"></div>
+
+        <div class="text" id="welcomeText">
+          <h2>Welcome! Let’s customize BuffetSense for YOU! </h2>
+          <button class="button nav-button" id="continueBtn">Continue</button>
+        </div>
+
+        <div class="input-page" id="inputPage">
+          <h2>First, what can we call you?</h2>
+          <p class="sub">We’d like to get to know you.</p>
+          <label for="nameInput">First Name</label>
+          <input type="text" id="nameInput" placeholder="Enter here" />
+          <div class="progress"><div class="progress-fill" id="progress-bar"></div></div>
+          <button class="button nav-button next-btn" id="nextBtn">Next</button>
+        </div>
+
+        <div class="final-page" id="finalPage">
+          <h2 id="greeting"></h2>
+          <div class="progress"><div class="progress-fill" id="progress-bar-final"></div></div>
+          <button class="button nav-button start-btn" id="startBtn">Get Started</button>
+        </div>
+      </div>
+    </div>
+    <div class="home-indicator"></div>
+  </div>
+
+  <script>
+    function updateClock() {
+      const now = new Date();
+      let h = now.getHours();
+      let m = now.getMinutes().toString().padStart(2,'0');
+      let s = now.getSeconds().toString().padStart(2,'0');
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      h = h % 12 || 12;
+      document.getElementById('clock').textContent = `${h}:${m}:${s} ${ampm}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    if (navigator.getBattery) {
+      navigator.getBattery().then(batt => {
+        const updateBattery = () => {
+          const level = Math.round(batt.level * 100);
+          document.getElementById('battery-level').textContent = `${level}%`;
+          document.getElementById('battery-icon').textContent = batt.charging ? '⚡' : '🔋';
+        };
+        updateBattery();
+        batt.addEventListener('levelchange', updateBattery);
+        batt.addEventListener('chargingchange', updateBattery);
+      });
+    }
+
+    setTimeout(() => {
+      document.getElementById('loader').style.display = 'none';
+      const logo = document.getElementById('logo');
+      logo.classList.add('top');
+      document.getElementById('welcomeText').style.display = 'block';
+    }, 3000);
+
+    document.getElementById('continueBtn').addEventListener('click', () => {
+      document.getElementById('welcomeText').style.display = 'none';
+      document.getElementById('inputPage').style.display = 'block';
+      document.getElementById('progress-bar').style.width = '50%';
+      document.getElementById('nameInput').focus();
+    });
+
+    document.getElementById('nextBtn').addEventListener('click', async () => {
+      const nameInput = document.getElementById('nameInput');
+      const name = nameInput.value.trim();
+
+      if (name === '') {
+        nameInput.style.borderColor = 'red';
+        nameInput.placeholder = 'Please enter your name';
+        nameInput.focus();
+        return;
+      }
+
+      nameInput.style.borderColor = '#bbb';
+
+      let prefix = 'Ms.';
+      try {
+        const res = await fetch(`https://api.genderize.io/?name=${name}`);
+        const data = await res.json();
+        prefix = data.gender === 'female' ? 'Ms.' : data.gender === 'male' ? 'Mr.' : 'Ms.';
+      } catch (err) {
+        console.warn('Gender detection failed. Defaulting to Mx.');
+      }
+
+      document.getElementById('greeting').innerHTML =
+        `Welcome to BuffetSense, <strong>${prefix} ${name}</strong>! Are you ready to start your dining?`;
+
+      document.getElementById('inputPage').style.display = 'none';
+      document.getElementById('finalPage').style.display = 'block';
+      document.getElementById('progress-bar-final').style.width = '100%';
+    });
+
+    document.getElementById('startBtn').addEventListener('click', () => {
+      window.location.href = 'dashboard.html';
+    });
+
+    document.getElementById('nameInput').addEventListener('input', (e) => {
+      if (e.target.value.trim() !== '') {
+        e.target.style.borderColor = '#bbb';
+      }
+    });
+  </script>
+</body>
+</html>
