@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BuffetSense Menu</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #53cde2, #f4e04d);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: #333;
+    }
+
+    .phone {
+      width: 360px;
+      height: 740px;
+      background: #fefae0;
+      border-radius: 50px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+      border: 5px solid #2d1b19;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+    }
+
+    .status-bar {
+      height: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 15px;
+      font-size: 12px;
+      background: #fefae0;
+    }
+
+    .top-bar {
+      text-align: center;
+      background: #fefae0;
+    }
+
+    .top-bar img {
+      height: 50px;
+      margin: 5px auto;
+    }
+
+    .overview {
+      padding: 20px;
+      font-size: 14px;
+      overflow-y: auto;
+      flex-grow: 1;
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .overview h3 {
+      text-align: center;
+      color: #2d1b19;
+      font-size: 20px;
+      margin-top: 20px;
+    }
+
+    .overview ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .overview li {
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      background: #fafafa;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+
+    .overview li:hover {
+      transform: scale(1.05);
+      background-color: #f0f0f0;
+    }
+
+    .overview img {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-right: 10px;
+    }
+
+    .sidebar {
+      position: absolute;
+      top: 0;
+      left: -160px;
+      width: 160px;
+      height: 100%;
+      background-color: #ccc;
+      padding: 60px 10px 20px 10px;
+      transition: left 0.3s ease-in-out;
+      z-index: 10;
+      border-top-right-radius: 20px;
+      border-bottom-right-radius: 20px;
+    }
+
+    .sidebar.show {
+      left: 0;
+    }
+
+    .sidebar .nav-item {
+      margin: 15px 0;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      transition: color 0.2s ease;
+    }
+
+    .sidebar .nav-item:hover {
+      color: #f4e04d;
+    }
+
+    .sidebar .nav-item i {
+      margin-right: 10px;
+      font-size: 18px;
+    }
+
+    .hamburger {
+      position: absolute;
+      top: 35px;
+      left: 20px;
+      font-size: 22px;
+      cursor: pointer;
+      z-index: 20;
+      color: #2d1b19;
+    }
+
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 360px;
+      height: 740px;
+      background-color: rgba(0, 0, 0, 0.4);
+      z-index: 5;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease;
+      border-radius: 50px;
+    }
+
+    .overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .nav-row {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      background: #fefae0;
+      padding: 8px 0;
+      border-top: 1px solid #ccc;
+      border-bottom: 1px solid #ccc;
+      z-index: 1;
+    }
+
+    .nav-row div {
+      text-align: center;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .nav-row i {
+      font-size: 20px;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 100;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+      background: #fff;
+      margin: 230px auto;
+      padding: 20px;
+      border-radius: 10px;
+      width: 300px;
+      text-align: center;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .modal-content h4 {
+      color: #2d1b19;
+    }
+
+    .modal-content p {
+      font-size: 14px;
+      margin: 30px 0;
+    }
+
+    .modal-content p strong {
+      color: #2d1b19;
+    }
+
+    .filter-tags {
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-tags span {
+      background: #2d1b19;
+      color: #fff;
+      padding: 5px 10px;
+      border-radius: 20px;
+      margin: 5px;
+      font-size: 12px;
+    }
+
+    .about-floating {
+      position: absolute;
+      bottom: 85px;
+      right: 20px;
+      background: #fff;
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+      z-index: 15;
+    }
+
+    .about-floating i {
+      font-size: 18px;
+    }
+    .phone.sidebar-active .overview {
+      margin-left: 160px;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="phone" id="phone">
+    <div class="notch"></div>
+    <div class="screen">
+      <div class="status-bar">
+        <div class="time" id="clock">--:--:--</div>
+        <div class="icons">
+          <span id="battery-icon">🔋</span>
+          <span id="battery-level">--%</span>
+        </div>
+      </div>
+    <!-- Hamburger Icon -->
+    <div class="hamburger" onclick="toggleSidebar()" id="hamburger-icon">
+      <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <div style="text-align: center; margin-bottom: 20px;">
+        <img src="buffetsense-logo.png" alt="BuffetSense Logo" style="width: 100px;">
+      </div>
+      <div class="nav-item" onclick="navigateTo('dashboard')"><i class="fas fa-home"></i> Home</div>
+      <div class="nav-item" onclick="navigateTo('menu')"><i class="fas fa-book-open"></i> Menu & Info</div>
+      <div class="nav-item" onclick="navigateTo('feedback')"><i class="fas fa-comment-dots"></i> Feedback</div>
+      <div class="nav-item" onclick="navigateTo('about')"><i class="fas fa-info-circle"></i> About Us</div>
+    </div>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <img src="buffetsense-logo.png" alt="BuffetSense Logo" />
+    </div>
+
+    <!-- Navigation Row -->
+    <div class="nav-row">
+      <div onclick="navigateTo('dashboard')"><i class="fas fa-home"></i><span>Home</span></div>
+      <div onclick="navigateTo('menu')"><i class="fas fa-book-open"></i><span>Menu & Info</span></div>
+      <div onclick="navigateTo('feedback')"><i class="fas fa-comment-dots"></i><span>Feedback</span></div>
+    </div>
+
+    <div class="about-floating" onclick="navigateTo('about')">
+      <i class="fas fa-info"></i>
+    </div>
+
+    <div class="overview">
+      <h3>Welcome to BuffetSense</h3>
+      <p>Enjoy our delicious and diverse buffet selection at Buffet Cabalen. Here's a taste of what awaits you:</p>
+
+      <h4>🐓 Grilled & Meat Dishes</h4>
+      <ul>
+        <li onclick="showDetails('Grilled Chicken Inasal')"><img src="images/grilled_chicken.jpg" alt=""> Grilled Chicken Inasal</li>
+        <li onclick="showDetails('Lechon Kawali')"><img src="images/lechon_kawali.jpg" alt=""> Lechon Kawali</li>
+        <li onclick="showDetails('Pork Sisig')"><img src="images/pork_sisig.jpg" alt=""> Pork Sisig</li>
+        <li onclick="showDetails('Kare-Kare')"><img src="images/kare_kare.jpg" alt=""> Kare-Kare</li>
+        <li onclick="showDetails('Beef Caldereta')"><img src="images/beef_caldereta.jpg" alt=""> Beef Caldereta</li>
+        <li onclick="showDetails('Chicken Adobo')"><img src="images/chicken_adobo.jpg" alt=""> Chicken Adobo</li>
+      </ul>
+
+      <h4>🍲 Soups & Stews</h4>
+      <ul>
+        <li onclick="showDetails('Sinigang na Baboy')"><img src="images/sinigang_na_baboy.jpg" alt=""> Sinigang na Baboy</li>
+        <li onclick="showDetails('Bulalo')"><img src="images/bulalo.jpg" alt=""> Bulalo</li>
+      </ul>
+
+      <h4>🍚 Rice & Noodles</h4>
+      <ul>
+        <li onclick="showDetails('Pancit Bihon')"><img src="images/pancit_bihon.jpg" alt=""> Pancit Bihon</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div id="myModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h4>Dish Name</h4>
+      <p><strong>Calories:</strong> 150</p>
+      <p><strong>Allergens:</strong> None</p>
+      <p><strong>Ingredients:</strong> Chicken, Vinegar, Soy Sauce</p>
+      <div class="filter-tags">
+        <span>Grilled</span>
+        <span>Meat</span>
+        <span>Healthy</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function updateClock() {
+      const now = new Date();
+      let h = now.getHours();
+      let m = now.getMinutes().toString().padStart(2,'0');
+      let s = now.getSeconds().toString().padStart(2,'0');
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      h = h % 12 || 12;
+      document.getElementById('clock').textContent = `${h}:${m}:${s} ${ampm}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    if (navigator.getBattery) {
+      navigator.getBattery().then(batt => {
+        const updateBattery = () => {
+          const level = Math.round(batt.level * 100);
+          document.getElementById('battery-level').textContent = `${level}%`;
+
+          // Dynamically change the battery icon based on the charging status
+          const batteryIcon = document.getElementById('battery-icon');
+          
+          if (batt.charging) {
+            batteryIcon.innerHTML = '⚡'; // Charging icon
+            batteryIcon.style.color = "#4CAF50"; // Charging color (green)
+          } else {
+            batteryIcon.innerHTML = '🔋'; // Battery icon when not charging
+            batteryIcon.style.color = level > 20 ? "#FFC107" : "#FF5722"; // Warning colors for low battery
+          }
+        };
+
+        // Initialize the battery status
+        updateBattery();
+
+        // Update the battery level whenever it changes
+        batt.addEventListener('levelchange', updateBattery);
+        batt.addEventListener('chargingchange', updateBattery);
+      }).catch((err) => {
+        console.log("Battery API is not supported on this device or browser.", err);
+      });
+    }
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('overlay');
+      const phone = document.getElementById('phone');
+      const icon = document.getElementById('hamburger-icon').firstElementChild;
+
+      sidebar.classList.toggle('show');
+      overlay.classList.toggle('show');
+      phone.classList.toggle('sidebar-active');
+
+      // Toggle hamburger ↔ X
+      if (icon.classList.contains('fa-bars')) {
+        icon.classList.remove('fa-bars');
+        icon.classList.add('fa-times');
+      } else {
+        icon.classList.remove('fa-times');
+        icon.classList.add('fa-bars');
+      }
+    }
+    function navigateTo(page) {
+      if (page === 'home') {
+        window.location.href = 'dashboard.html';
+      } else {
+        window.location.href = page + '.html';
+      }
+    }
+
+
+    function showDetails(dish) {
+      document.querySelector('.modal-content h4').innerText = dish;
+      document.getElementById('myModal').style.display = 'block';
+    }
+
+    function closeModal() {
+      document.getElementById('myModal').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
