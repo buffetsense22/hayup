@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Guest Feedback</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #53cde2, #f4e04d);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .phone {
+      width: 360px;
+      height: 740px;
+      background: #fefae0;
+      border-radius: 50px;
+      box-shadow: 0 0 10px #0006;
+      border: 5px solid #2d1b19;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .status-bar {
+      height: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 15px;
+      font-size: 12px;
+      background: #fefae0;
+    }
+
+    .top-bar {
+      text-align: center;
+      background: #fefae0;
+    }
+
+    .top-bar img {
+      height: 50px;
+      margin: 5px auto;
+    }
+
+    .nav-row {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      background: #fefae0;
+      border-top: 1px solid #ccc;
+      padding: 8px 0;
+      font-size: 14px;
+    }
+
+    .nav-row div {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #333;
+      cursor: pointer;
+    }
+
+    .nav-row div:hover {
+      color: #000;
+    }
+
+    .nav-row i {
+      font-size: 18px;
+      margin-bottom: 2px;
+    }
+
+    .content {
+      flex: 1;
+      padding: 20px;
+      font-size: 14px;
+      overflow-y: auto;
+    }
+
+    .feedback-section h2 {
+      text-align: center;
+      font-size: 18px;
+      margin-top: 10px;
+      margin-bottom: 4px;
+    }
+
+    .feedback-section p {
+      text-align: center;
+      font-size: 13px;
+      color: #555;
+    }
+
+    .rating-stars {
+      text-align: center;
+      margin: 10px 0;
+    }
+
+    .rating-stars i {
+      font-size: 20px;
+      color: #FFD700;
+      cursor: pointer;
+    }
+
+    .feedback-section textarea,
+    .feedback-section input[type="text"] {
+      width: 70%;
+      padding: 5px;
+      margin-top: 20px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .checkbox {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .submit-btn {
+      background-color: #3cb371;
+      color: white;
+      border: none;
+      padding: 10px;
+      margin: 20px auto 10px;
+      border-radius: 8px;
+      font-size: 16px;
+      width: 80%;
+      cursor: pointer;
+      display: block;
+    }
+
+    .review-section {
+      margin: 10px 20px;
+    }
+
+    .review-section h4 {
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    .review {
+      background: #f8f8f8;
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+
+    .review .meta {
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .review .stars {
+      color: #FFD700;
+      font-size: 13px;
+      margin-left: 5px;
+    }
+
+    .review p {
+      font-size: 14px;
+      margin: 6px 0;
+    }
+
+    .review-icons {
+      font-size: 12px;
+      color: #888;
+    }
+
+    .review-icons i {
+      margin-right: 10px;
+    }
+
+    .sidebar {
+      position: absolute;
+      top: 0;
+      left: -160px;
+      width: 160px;
+      height: 100%;
+      background-color: #ccc;
+      border-top-right-radius: 20px;
+      border-bottom-right-radius: 20px;
+      padding: 60px 10px 20px 10px;
+      transition: left 0.3s ease-in-out;
+      z-index: 10;
+    }
+
+    .sidebar.show {
+      left: 0;
+    }
+
+    .sidebar .nav-item {
+      margin: 15px 0;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .sidebar .nav-item i {
+      margin-right: 10px;
+      font-size: 18px;
+    }
+
+    .hamburger {
+      position: absolute;
+      top: 35px;
+      left: 20px;
+      font-size: 22px;
+      cursor: pointer;
+      z-index: 20;
+    }
+
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 360px;
+      height: 740px;
+      background-color: rgba(0, 0, 0, 0.4);
+      z-index: 5;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease;
+      border-radius: 50px;
+    }
+
+    .overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    .about-floating {
+      position: absolute;
+      bottom: 85px;
+      right: 20px;
+      background: #fff;
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+      z-index: 15;
+    }
+
+
+     .about-floating i {
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone" id="phone">
+    <div class="notch"></div>
+    <div class="screen">
+      <div class="status-bar">
+        <div class="time" id="clock">--:--:--</div>
+        <div class="icons">
+          <span id="battery-icon">🔋</span>
+          <span id="battery-level">--%</span>
+        </div>
+      </div>
+    <div class="hamburger" onclick="toggleSidebar()" id="hamburger-icon">
+      <i class="fas fa-bars"></i>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+      <div style="text-align: center; margin-bottom: 20px;">
+        <img src="buffetsense-logo.png" alt="BuffetSense Logo" style="width: 100px;">
+      </div>
+      <div class="nav-item" onclick="navigateTo('home')"><i class="fas fa-home"></i> Home</div>
+      <div class="nav-item" onclick="navigateTo('menu')"><i class="fas fa-book-open"></i> Menu & Info</div>
+      <div class="nav-item" onclick="navigateTo('feedback')"><i class="fas fa-comment-dots"></i> Feedback</div>
+      <div class="nav-item" onclick="navigateTo('about')"><i class="fas fa-info-circle"></i> About Us</div>
+        <div class="food-menu-hidden" onclick="navigateTo('otp-backend/public/verify')">
+          <i class="fas fa-concierge-bell"></i>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+    <div class="top-bar">
+      <img src="buffetsense-logo.png" alt="BuffetSense Logo"/>
+    </div>
+
+    <div class="nav-row">
+      <div onclick="navigateTo('home')"><i class="fas fa-home"></i><span>Home</span></div>
+      <div onclick="navigateTo('menu')"><i class="fas fa-book-open"></i><span>Menu & Info</span></div>
+      <div onclick="navigateTo('feedback')"><i class="fas fa-comment-dots"></i><span>Feedback</span></div>
+    </div>
+
+    <div class="feedback-section">
+      <h2>Guest Feedback</h2>
+      <p>Rate your meal & share your thoughts!</p>
+
+      <div class="rating-stars" id="star-container">
+        <i class="fas fa-star" data-value="1"></i>
+        <i class="fas fa-star" data-value="2"></i>
+        <i class="fas fa-star" data-value="3"></i>
+        <i class="fas fa-star" data-value="4"></i>
+        <i class="fas fa-star" data-value="5"></i>
+      </div>
+
+      <input type="text" id="nameInput" placeholder="Your name (optional)">
+      <textarea id="feedbackInput" rows="3" placeholder="Write your feedback here..."></textarea>
+
+      <div class="checkbox">
+        <label><input type="checkbox" id="anonCheck"/> Post anonymously</label>
+      </div>
+
+      <button class="submit-btn" onclick="submitFeedback()">Submit Review</button>
+    </div>
+
+    <div class="review-section">
+      <h4>Recent Reviews <select><option>Latest</option></select></h4>
+      <div id="reviewsContainer">
+        <div class="review">
+          <div class="meta">John D. <span class="stars">★★★★★</span></div>
+          <p>The seafood section was amazing!</p>
+          <div class="review-icons">
+            <i class="fas fa-thumbs-up"></i> 10
+            <i class="fas fa-reply"></i> Reply
+          </div>
+        </div>
+        <div class="review">
+          <div class="meta">Emma W. <span class="stars">★★★★☆</span></div>
+          <p>Loved the gluten-free options!</p>
+          <div class="review-icons">
+            <i class="fas fa-thumbs-up"></i> 5
+            <i class="fas fa-reply"></i> Reply
+          </div>
+         </div>
+         <div class="about-floating" onclick="navigateTo('about')">
+      <i class="fas fa-info"></i>
+    </div>
+  </div>
+
+  </div>
+
+  <script>
+    function updateClock() {
+      const now = new Date();
+      let h = now.getHours();
+      let m = now.getMinutes().toString().padStart(2,'0');
+      let s = now.getSeconds().toString().padStart(2,'0');
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      h = h % 12 || 12;
+      document.getElementById('clock').textContent = `${h}:${m}:${s} ${ampm}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    if (navigator.getBattery) {
+      navigator.getBattery().then(batt => {
+        const updateBattery = () => {
+          const level = Math.round(batt.level * 100);
+          document.getElementById('battery-level').textContent = `${level}%`;
+
+          // Dynamically change the battery icon based on the charging status
+          const batteryIcon = document.getElementById('battery-icon');
+          
+          if (batt.charging) {
+            batteryIcon.innerHTML = '⚡'; // Charging icon
+            batteryIcon.style.color = "#4CAF50"; // Charging color (green)
+          } else {
+            batteryIcon.innerHTML = '🔋'; // Battery icon when not charging
+            batteryIcon.style.color = level > 20 ? "#FFC107" : "#FF5722"; // Warning colors for low battery
+          }
+        };
+
+        // Initialize the battery status
+        updateBattery();
+
+        // Update the battery level whenever it changes
+        batt.addEventListener('levelchange', updateBattery);
+        batt.addEventListener('chargingchange', updateBattery);
+      }).catch((err) => {
+        console.log("Battery API is not supported on this device or browser.", err);
+      });
+    }
+    let selectedStars = 5;
+
+    document.querySelectorAll('#star-container i').forEach(star => {
+      star.addEventListener('click', () => {
+        selectedStars = parseInt(star.dataset.value);
+        updateStarDisplay();
+      });
+    });
+
+    function updateStarDisplay() {
+      document.querySelectorAll('#star-container i').forEach(star => {
+        const val = parseInt(star.dataset.value);
+        star.className = val <= selectedStars ? 'fas fa-star' : 'far fa-star';
+      });
+    }
+
+    function submitFeedback() {
+      const nameInput = document.getElementById("nameInput");
+      const feedbackInput = document.getElementById("feedbackInput");
+      const anon = document.getElementById("anonCheck").checked;
+
+      const name = anon ? "Anonymous" : (nameInput.value.trim() || "Guest");
+      const feedback = feedbackInput.value.trim();
+      const stars = '★'.repeat(selectedStars) + '☆'.repeat(5 - selectedStars);
+
+      if (!feedback) {
+        alert("Please enter your feedback.");
+        return;
+      }
+
+      const reviewHTML = `
+        <div class="review">
+          <div class="meta">${name} <span class="stars">${stars}</span></div>
+          <p>${feedback}</p>
+          <div class="review-icons">
+            <i class="fas fa-thumbs-up"></i> 0
+            <i class="fas fa-reply"></i> Reply
+          </div>
+        </div>
+
+      `;
+
+      document.getElementById("reviewsContainer").insertAdjacentHTML('afterbegin', reviewHTML);
+      nameInput.value = '';
+      feedbackInput.value = '';
+      document.getElementById("anonCheck").checked = false;
+      selectedStars = 5;
+      updateStarDisplay();
+    }
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('overlay');
+      sidebar.classList.toggle('show');
+      overlay.classList.toggle('show');
+    }
+
+    function navigateTo(page) {
+      if (page === 'home') {
+        window.location.href = 'dashboard.html';
+      } else {
+        window.location.href = page + '.html';
+      }
+    }
+
+
+    updateStarDisplay();
+  </script>
+
+</body>
+</html>
