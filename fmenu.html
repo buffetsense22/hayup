@@ -12,8 +12,8 @@
       background: linear-gradient(to right, #53cde2, #f4e04d);
       display: flex;
       justify-content: center;
-      align-items: center;
-      height: 100vh;
+      min-height: 100vh;
+      padding: 20px 0;
       color: #333;
     }
 
@@ -29,7 +29,6 @@
       display: flex;
       flex-direction: column;
       box-sizing: border-box;
-      overflow-y: auto;
     }
 
     .status-bar {
@@ -187,7 +186,6 @@
       margin-bottom: 2px;
     }
 
-    /* Modal */
     .modal {
       display: none;
       position: fixed;
@@ -265,29 +263,26 @@
     .about-floating i {
       font-size: 18px;
     }
+
     .phone.sidebar-active .overview {
       margin-left: 160px;
     }
-
   </style>
 </head>
 <body>
   <div class="phone" id="phone">
-    <div class="notch"></div>
-    <div class="screen">
-      <div class="status-bar">
-        <div class="time" id="clock">--:--:--</div>
-        <div class="icons">
-          <span id="battery-icon">🔋</span>
-          <span id="battery-level">--%</span>
-        </div>
+    <div class="status-bar">
+      <div class="time" id="clock">--:--:--</div>
+      <div class="icons">
+        <span id="battery-icon">🔋</span>
+        <span id="battery-level">--%</span>
       </div>
-    <!-- Hamburger Icon -->
+    </div>
+
     <div class="hamburger" onclick="toggleSidebar()" id="hamburger-icon">
       <i class="fas fa-bars"></i>
     </div>
 
-    <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
       <div style="text-align: center; margin-bottom: 20px;">
         <img src="buffetsense-logo.png" alt="BuffetSense Logo" style="width: 100px;">
@@ -298,15 +293,12 @@
       <div class="nav-item" onclick="navigateTo('about')"><i class="fas fa-info-circle"></i> About Us</div>
     </div>
 
-    <!-- Overlay -->
     <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
-    <!-- Top Bar -->
     <div class="top-bar">
       <img src="buffetsense-logo.png" alt="BuffetSense Logo" />
     </div>
 
-    <!-- Navigation Row -->
     <div class="nav-row">
       <div onclick="navigateTo('dashboard')"><i class="fas fa-home"></i><span>Home</span></div>
       <div onclick="navigateTo('menu')"><i class="fas fa-book-open"></i><span>Menu & Info</span></div>
@@ -344,7 +336,6 @@
     </div>
   </div>
 
-  <!-- Modal -->
   <div id="myModal" class="modal">
     <div class="modal-content">
       <span class="close" onclick="closeModal()">&times;</span>
@@ -379,28 +370,16 @@
           const level = Math.round(batt.level * 100);
           document.getElementById('battery-level').textContent = `${level}%`;
 
-          // Dynamically change the battery icon based on the charging status
           const batteryIcon = document.getElementById('battery-icon');
-          
-          if (batt.charging) {
-            batteryIcon.innerHTML = '⚡'; // Charging icon
-            batteryIcon.style.color = "#4CAF50"; // Charging color (green)
-          } else {
-            batteryIcon.innerHTML = '🔋'; // Battery icon when not charging
-            batteryIcon.style.color = level > 20 ? "#FFC107" : "#FF5722"; // Warning colors for low battery
-          }
+          batteryIcon.innerHTML = batt.charging ? '⚡' : '🔋';
+          batteryIcon.style.color = batt.charging ? "#4CAF50" : (level > 20 ? "#FFC107" : "#FF5722");
         };
-
-        // Initialize the battery status
         updateBattery();
-
-        // Update the battery level whenever it changes
         batt.addEventListener('levelchange', updateBattery);
         batt.addEventListener('chargingchange', updateBattery);
-      }).catch((err) => {
-        console.log("Battery API is not supported on this device or browser.", err);
       });
     }
+
     function toggleSidebar() {
       const sidebar = document.getElementById('sidebar');
       const overlay = document.getElementById('overlay');
@@ -411,15 +390,10 @@
       overlay.classList.toggle('show');
       phone.classList.toggle('sidebar-active');
 
-      // Toggle hamburger ↔ X
-      if (icon.classList.contains('fa-bars')) {
-        icon.classList.remove('fa-bars');
-        icon.classList.add('fa-times');
-      } else {
-        icon.classList.remove('fa-times');
-        icon.classList.add('fa-bars');
-      }
+      icon.classList.toggle('fa-bars');
+      icon.classList.toggle('fa-times');
     }
+
     function navigateTo(page) {
       if (page === 'home') {
         window.location.href = 'dashboard.html';
@@ -427,7 +401,6 @@
         window.location.href = page + '.html';
       }
     }
-
 
     function showDetails(dish) {
       document.querySelector('.modal-content h4').innerText = dish;
