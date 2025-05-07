@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Verify Email</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #fefae0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .phone {
+      width: 360px;
+      height: 740px;
+      background: #fefae0;
+      border-radius: 50px;
+      box-shadow: 0 0 10px #0006;
+      border: 5px solid #2d1b19;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s ease;
+    }
+
+    .status-bar {
+      height: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 15px;
+      font-size: 12px;
+      background: #fefae0;
+      z-index: 1;
+    }
+
+    .top-bar {
+      text-align: center;
+      background: #fefae0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .top-bar img {
+      height: 50px;
+      margin: 5px auto;
+    }
+
+    .nav-row {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      background: #fefae0;
+      padding: 8px 0;
+      border-top: 1px solid #ccc;
+      border-bottom: 1px solid #ccc;
+      z-index: 1;
+    }
+
+    .nav-row div {
+      text-align: center;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .nav-row i {
+      font-size: 20px;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .overview {
+      background: #fefae0;
+      padding: 15px;
+      margin: 10px;
+      border-radius: 15px;
+      font-size: 14px;
+      flex-grow: 1;
+      overflow-y: auto;
+      z-index: 1;
+      transition: margin-left 0.3s ease;
+    }
+
+    .tile-container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .tile {
+      background: #fefae0;
+      border-radius: 12px;
+      padding: 5px;
+      font-size: 13px;
+      text-align: center;
+      box-shadow: 0 0 5px #ccc;
+      height: 70px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .notifications {
+      background: #fefae0;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 12px;
+      font-size: 13px;
+      box-shadow: 0 0 5px #ccc;
+    }
+
+    .buttons-row {
+      display: flex;
+      justify-content: space-around;
+      margin: 10px 0;
+      z-index: 1;
+    }
+
+    .btn-box {
+      text-align: center;
+      padding: 10px;
+      background: #0f5132;
+      border-radius: 12px;
+      box-shadow: 0 0 5px #ccc;
+      width: 90px;
+      cursor: pointer;
+    }
+
+    .btn-box i {
+      font-size: 22px;
+      margin-bottom: 5px;
+    }
+
+    .btn-box span {
+      font-size: 12px;
+      display: block;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      position: absolute;
+      top: 0;
+      left: -160px;
+      width: 160px;
+      height: 100%;
+      background-color: #ccc;
+
+      border-top-right-radius: 20px;
+      border-bottom-right-radius: 20px;
+      padding: 60px 10px 20px 10px;
+      transition: left 0.3s ease-in-out;
+      z-index: 10;
+    }
+
+    .sidebar.show {
+      left: 0;
+    }
+
+    .sidebar .nav-item {
+      margin: 15px 0;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .sidebar .nav-item i {
+      margin-right: 10px;
+      font-size: 18px;
+    }
+
+    .hamburger {
+      position: absolute;
+      top: 35px;
+      left: 20px;
+      font-size: 22px;
+      cursor: pointer;
+      z-index: 20;
+    }
+
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 360px;
+      height: 740px;
+      background-color: rgba(0, 0, 0, 0.4);
+      z-index: 5;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease;
+      border-radius: 50px;
+    }
+
+    .overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .about-floating {
+      position: absolute;
+      bottom: 85px;
+      right: 20px;
+      background: #fff;
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+      z-index: 15;
+    }
+
+    .about-floating i {
+      font-size: 18px;
+    }
+
+    .phone.sidebar-active .overview {
+      margin-left: 160px;
+    }
+    .container {
+      background: white;
+      padding: 5px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px #aaa;
+      width: 250px;
+      text-align: center;
+      margin: auto;
+      
+    }
+
+    input {
+      width: 90%;
+      padding: 3px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background-color: #0f5132;
+      color: white;
+      padding: 10px;
+      border: none;
+      width: 90%;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background-color: #0f5132;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    #message {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone" id="phone">
+    <div class="notch"></div>
+    <div class="screen">
+      <div class="status-bar">
+        <div class="time" id="clock">--:--:--</div>
+        <div class="icons">
+          <span id="battery-icon">🔋</span>
+          <span id="battery-level">--%</span>
+        </div>
+      </div>
+
+      <div class="hamburger" onclick="toggleSidebar()" id="hamburger-icon">
+        <i class="fas fa-bars"></i>
+      </div>
+
+      <div class="sidebar" id="sidebar">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <img src="buffetsense-logo.png" alt="BuffetSense Logo" style="width: 100px;">
+        </div>
+        <div class="nav-item" onclick="navigateTo('dashboard')"><i class="fas fa-home"></i> Home</div>
+        <div class="nav-item" onclick="navigateTo('menu')"><i class="fas fa-book-open"></i> Menu & Info</div>
+        <div class="nav-item" onclick="navigateTo('feedback')"><i class="fas fa-comment-dots"></i> Feedback</div>
+        <div class="nav-item" onclick="navigateTo('about')"><i class="fas fa-info-circle"></i> About Us</div>
+        <div class="food-menu-hidden" onclick="navigateTo('otp-backend/public/verify')">
+          <i class="fas fa-concierge-bell"></i>
+        </div>
+      </div>
+
+      <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+      <div class="top-bar">
+        <img src="buffetsense-logo.png" alt="BuffetSense Logo">
+      </div>
+
+      <div class="nav-row">
+        <div onclick="navigateTo('dashboard')"><i class="fas fa-home"></i><span>Home</span></div>
+        <div onclick="navigateTo('menu')"><i class="fas fa-book-open"></i><span>Menu & Info</span></div>
+        <div onclick="navigateTo('feedback')"><i class="fas fa-comment-dots"></i><span>Feedback</span></div>
+       
+      </div>
+
+      <div class="overview">
+        <div class="container">
+          <h3>Verify Email</h3>
+          <p id="message"></p>
+          <input type="email" id="email" placeholder="Enter your email" required />
+          <button onclick="sendOTP()">Send OTP</button>
+
+          <div class="hidden" id="otp-section">
+            <input type="text" id="otp" placeholder="Enter OTP" required />
+            <button onclick="verifyOTP()">Verify OTP</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function sendOTP() {
+      const email = document.getElementById("email").value.trim();
+      if (!email) return alert("Enter your email first.");
+
+      fetch("http://localhost:3000/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("message").textContent = data.message;
+        if (data.success) {
+          document.getElementById("otp-section").classList.remove("hidden");
+        }
+      })
+      .catch(err => {
+        document.getElementById("message").textContent = "Server error.";
+        console.error(err);
+      });
+    }
+
+    function verifyOTP() {
+      const email = document.getElementById("email").value.trim();
+      const otp = document.getElementById("otp").value.trim();
+      if (!otp) return alert("Enter the OTP.");
+
+      fetch("http://localhost:3000/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, otp })
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("message").textContent = data.message;
+        if (data.success) {
+          window.location.href = "tracking.html";
+        }
+      })
+      .catch(err => {
+        document.getElementById("message").textContent = "Server error.";
+        console.error(err);
+      });
+    }
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('overlay');
+      const phone = document.getElementById('phone');
+      const icon = document.getElementById('hamburger-icon').firstElementChild;
+
+      sidebar.classList.toggle('show');
+      overlay.classList.toggle('show');
+      phone.classList.toggle('sidebar-active');
+
+      if (icon.classList.contains('fa-bars')) {
+        icon.classList.remove('fa-bars');
+        icon.classList.add('fa-times');
+      } else {
+        icon.classList.remove('fa-times');
+        icon.classList.add('fa-bars');
+      }
+    }
+    function navigateTo(page) {
+      if (page === 'dashboard') {
+        window.location.href = '../../dashboard.html';
+      } else if (page === 'menu') {
+        window.location.href = '../../menu.html';
+      } else if (page === 'feedback') {
+        window.location.href = '../../feedback.html';
+      } else if (page === 'about') {
+        window.location.href = '../../about.html';
+      }
+    }
+
+
+    function updateClock() {
+      const now = new Date();
+      let h = now.getHours();
+      let m = now.getMinutes().toString().padStart(2, '0');
+      let s = now.getSeconds().toString().padStart(2, '0');
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      h = h % 12 || 12;
+      document.getElementById('clock').textContent = `${h}:${m}:${s} ${ampm}`;
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    if (navigator.getBattery) {
+      navigator.getBattery().then(batt => {
+        const updateBattery = () => {
+          const level = Math.round(batt.level * 100);
+          document.getElementById('battery-level').textContent = `${level}%`;
+
+          const batteryIcon = document.getElementById('battery-icon');
+          if (batt.charging) {
+            batteryIcon.innerHTML = '⚡';
+            batteryIcon.style.color = "#4CAF50";
+          } else {
+            batteryIcon.innerHTML = '🔋';
+            batteryIcon.style.color = level > 20 ? "#FFC107" : "#FF5722";
+          }
+        };
+
+        updateBattery();
+        batt.addEventListener('levelchange', updateBattery);
+        batt.addEventListener('chargingchange', updateBattery);
+      }).catch((err) => {
+        console.log("Battery API not supported:", err);
+      });
+    }
+  </script>
+</body>
+</html>
