@@ -1,21 +1,20 @@
-// server.js
 const express = require('express');
 const nodemailer = require('nodemailer');
 const cors = require('cors');
-const dotenv = require('dotenv');
 const path = require('path');
-
+const dotenv = require('dotenv');
 dotenv.config();
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public'))); // Serve verify.html
+app.use(express.static(path.join(__dirname, 'public'))); // serve verify.html
 
 const otpStore = new Map();
 
-// Email transporter
+// Transporter
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -27,14 +26,12 @@ const transporter = nodemailer.createTransport({
 // Send OTP
 app.post('/send-otp', async (req, res) => {
   const { email } = req.body;
-  if (!email) return res.status(400).json({ success: false, message: 'Email is required' });
-
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   otpStore.set(email, otp);
 
   try {
     await transporter.sendMail({
-      from: `"OTP Verification" <${process.env.EMAIL_USER}>`,
+      from: process.env.EMAIL_USER,
       to: email,
       subject: 'Your OTP Code',
       text: `Your OTP is: ${otp}`,
@@ -42,7 +39,6 @@ app.post('/send-otp', async (req, res) => {
 
     res.json({ success: true, message: 'OTP sent to your email' });
   } catch (err) {
-    console.error(err);
     res.status(500).json({ success: false, message: 'Failed to send OTP' });
   }
 });
@@ -51,16 +47,18 @@ app.post('/send-otp', async (req, res) => {
 app.post('/verify-otp', (req, res) => {
   const { email, otp } = req.body;
   const storedOtp = otpStore.get(email);
-
-  if (storedOtp && otp === storedOtp) {
+  if (storedOtp && storedOtp === otp) {
     otpStore.delete(email);
-    return res.json({ success: true, message: 'OTP verified successfully' });
+    return res.json({ success: true, message: 'OTP verified' });
   }
-
   res.status(400).json({ success: false, message: 'Invalid OTP' });
 });
 
-// Start server
+// Fallback route (optional)
+app.get('*', (_, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'verify.html'));
+});
+
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`Server running at http://localhost:${PORT}`);
 });
