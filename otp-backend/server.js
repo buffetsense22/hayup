@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public'))); // serve verify.html
+app.use(express.static(path.join(__dirname, 'public/verify.html'))); // serve verify.html
 
 const otpStore = new Map();
 
