@@ -1,64 +1,57 @@
-const express = require('express');
-const nodemailer = require('nodemailer');
-const cors = require('cors');
-const path = require('path');
-const dotenv = require('dotenv');
-dotenv.config();
+const express = require("express");
+const cors = require("cors");
+const bodyParser = require("body-parser");
+const nodemailer = require("nodemailer");
+const path = require("path");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public/verify.html'))); // serve verify.html
+app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, "public"))); // serve verify.html
 
 const otpStore = new Map();
 
-// Transporter
+// Replace with real credentials or environment variables
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  service: "gmail",
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
+    user: process.env.exbyahyah03@gmail.com,          // your-email@gmail.com
+    pass: process.env.fnzg uofa bice djna // use app password or secure method
+  }
 });
 
-// Send OTP
-app.post('/send-otp', async (req, res) => {
+app.post("/send-otp", async (req, res) => {
   const { email } = req.body;
+  if (!email) return res.status(400).json({ success: false, message: "Email required." });
+
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   otpStore.set(email, otp);
 
   try {
     await transporter.sendMail({
-      from: process.env.EMAIL_USER,
+      from: process.env.EMAIL,
       to: email,
-      subject: 'Your OTP Code',
-      text: `Your OTP is: ${otp}`,
+      subject: "Your OTP Code",
+      text: `Your OTP is: ${otp}`
     });
 
-    res.json({ success: true, message: 'OTP sent to your email' });
+    res.json({ success: true, message: "OTP sent to your email." });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Failed to send OTP' });
+    console.error(err);
+    res.status(500).json({ success: false, message: "Failed to send OTP." });
   }
 });
 
-// Verify OTP
-app.post('/verify-otp', (req, res) => {
+app.post("/verify-otp", (req, res) => {
   const { email, otp } = req.body;
-  const storedOtp = otpStore.get(email);
-  if (storedOtp && storedOtp === otp) {
+  if (otpStore.get(email) === otp) {
     otpStore.delete(email);
-    return res.json({ success: true, message: 'OTP verified' });
+    res.json({ success: true, message: "OTP verified successfully!" });
+  } else {
+    res.json({ success: false, message: "Invalid or expired OTP." });
   }
-  res.status(400).json({ success: false, message: 'Invalid OTP' });
 });
 
-// Fallback route (optional)
-app.get('*', (_, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'verify.html'));
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
