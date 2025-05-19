@@ -328,11 +328,13 @@
   </div>
 
   <script>
+    const BASE_URL = "https://REPLACE_WITH_BACKEND_URL"; // ← change this after deploying backend
+
     function sendOTP() {
       const email = document.getElementById("email").value.trim();
       if (!email) return alert("Enter your email first.");
 
-      fetch("http://localhost:3000/send-otp", {
+      fetch(`${BASE_URL}/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email })
@@ -355,7 +357,7 @@
       const otp = document.getElementById("otp").value.trim();
       if (!otp) return alert("Enter the OTP.");
 
-      fetch("http://localhost:3000/verify-otp", {
+      fetch(`${BASE_URL}/verify-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, otp })
@@ -364,7 +366,7 @@
       .then(data => {
         document.getElementById("message").textContent = data.message;
         if (data.success) {
-          window.location.href = "tracking.html";
+          window.location.href = "tracking.html"; // change this if needed
         }
       })
       .catch(err => {
