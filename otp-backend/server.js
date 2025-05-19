@@ -1,4 +1,4 @@
-
+require("dotenv").config(); // Ensures .env is loaded locally
 
 const express = require("express");
 const cors = require("cors");
@@ -11,23 +11,25 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, "public"))); // Serve static frontend files
+app.use(express.static(path.join(__dirname, "public"))); // Serves static files (verify.html, etc.)
 
 const otpStore = new Map();
 
-// Create the transporter for sending emails
+// Nodemailer transporter using Gmail
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: process.env.EMAIL,          // Set in Render Environment tab
-    pass: process.env.EMAIL_PASSWORD // Set in Render Environment tab
+    user: process.env.EMAIL,          // Set in Render's Environment tab
+    pass: process.env.EMAIL_PASSWORD // App password from Gmail
   }
 });
 
-// Route to send OTP
+// Endpoint to send OTP
 app.post("/send-otp", async (req, res) => {
   const { email } = req.body;
-  if (!email) return res.status(400).json({ success: false, message: "Email required." });
+  if (!email) {
+    return res.status(400).json({ success: false, message: "Email required." });
+  }
 
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   otpStore.set(email, otp);
@@ -41,24 +43,25 @@ app.post("/send-otp", async (req, res) => {
     });
 
     res.json({ success: true, message: "OTP sent to your email." });
-  } catch (err) {
-    console.error("Email send error:", err);
+  } catch (error) {
+    console.error("Error sending email:", error);
     res.status(500).json({ success: false, message: "Failed to send OTP." });
   }
 });
 
-// Route to verify OTP
+// Endpoint to verify OTP
 app.post("/verify-otp", (req, res) => {
   const { email, otp } = req.body;
+
   if (otpStore.get(email) === otp) {
-    otpStore.delete(email); // One-time use
+    otpStore.delete(email);
     res.json({ success: true, message: "OTP verified successfully!" });
   } else {
-    res.json({ success: false, message: "Invalid or expired OTP." });
+    res.status(401).json({ success: false, message: "Invalid or expired OTP." });
   }
 });
 
-// Start the server
+// Start server
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
 });
