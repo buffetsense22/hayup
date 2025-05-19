@@ -1,3 +1,5 @@
+
+
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
@@ -9,19 +11,20 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, "public"))); // serve verify.html
+app.use(express.static(path.join(__dirname, "public"))); // Serve static frontend files
 
 const otpStore = new Map();
 
-// Replace with real credentials or environment variables
+// Create the transporter for sending emails
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: process.env.EMAIL,          // your-email@gmail.com
-    pass: process.env.EMAIL_PASSWORD // use app password or secure method
+    user: process.env.EMAIL,          // Set in Render Environment tab
+    pass: process.env.EMAIL_PASSWORD // Set in Render Environment tab
   }
 });
 
+// Route to send OTP
 app.post("/send-otp", async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ success: false, message: "Email required." });
@@ -39,19 +42,23 @@ app.post("/send-otp", async (req, res) => {
 
     res.json({ success: true, message: "OTP sent to your email." });
   } catch (err) {
-    console.error(err);
+    console.error("Email send error:", err);
     res.status(500).json({ success: false, message: "Failed to send OTP." });
   }
 });
 
+// Route to verify OTP
 app.post("/verify-otp", (req, res) => {
   const { email, otp } = req.body;
   if (otpStore.get(email) === otp) {
-    otpStore.delete(email);
+    otpStore.delete(email); // One-time use
     res.json({ success: true, message: "OTP verified successfully!" });
   } else {
     res.json({ success: false, message: "Invalid or expired OTP." });
   }
 });
 
-app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+// Start the server
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
+});
