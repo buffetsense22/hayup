@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>BuffetSense</title>
+<link rel="stylesheet" href="styles.css" />
+<style>
+  .step { display: none; flex: 1; flex-direction: column; justify-content: center; gap: var(--s3); }
+  .step.active { display: flex; animation: enter 0.4s ease both; }
+  @keyframes enter { from { opacity: 0; transform: translateY(12px); } }
+  .brand { display: grid; place-items: center; padding: var(--s5) 0 var(--s3); }
+  .brand img { width: 140px; max-width: 50%; height: auto; }
+  .actions { margin-top: auto; padding-top: var(--s4); }
+  .splash { flex: 1; display: grid; place-items: center; }
+  .splash img { width: 200px; max-width: 60%; animation: enter 0.8s ease both; }
+  body.ready .splash { display: none; }
+  body:not(.ready) .brand, body:not(.ready) #steps { display: none; }
+</style>
+</head>
+<body>
+<main class="app">
+  <div class="splash" aria-hidden="true">
+    <img src="buffetsense-logo.png" alt="" />
+  </div>
+
+  <div class="brand">
+    <img src="buffetsense-logo.png" alt="BuffetSense" />
+  </div>
+
+  <div id="steps" style="display:flex;flex:1;flex-direction:column;">
+    <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <section class="step active" id="step-welcome">
+      <h1>Let’s set up BuffetSense for you</h1>
+      <p>It takes less than a minute.</p>
+      <div class="actions"><button class="btn btn-primary" id="continueBtn">Continue</button></div>
+    </section>
+
+    <section class="step" id="step-name">
+      <h2>What should we call you?</h2>
+      <p>We’ll use your first name around the app.</p>
+      <div class="field" id="nameField">
+        <label for="nameInput">First name</label>
+        <input type="text" id="nameInput" autocomplete="given-name" placeholder="e.g. Sam" aria-describedby="nameError" />
+        <p class="field-error" id="nameError" role="alert"></p>
+      </div>
+      <div class="actions"><button class="btn btn-primary" id="nextBtn">Next</button></div>
+    </section>
+
+    <section class="step" id="step-final">
+      <h2 id="greeting"></h2>
+      <p>Your menu is ready. Browse dishes, check ingredients and share feedback.</p>
+      <div class="actions"><button class="btn btn-primary" id="startBtn">Get started</button></div>
+    </section>
+  </div>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const steps = ["step-welcome", "step-name", "step-final"];
+const progress = [33, 66, 100];
+
+function show(index) {
+  steps.forEach((s, i) => $(s).classList.toggle("active", i === index));
+  $("progressFill").style.width = progress[index] + "%";
+  $("progress").setAttribute("aria-valuenow", progress[index]);
+}
+
+// Short splash instead of a 3s fake loader
+setTimeout(() => { document.body.classList.add("ready"); show(0); }, 900);
+
+$("continueBtn").addEventListener("click", () => {
+  show(1);
+  $("nameInput").focus();
+});
+
+function submitName() {
+  const name = $("nameInput").value.trim();
+  const field = $("nameField");
+  if (!name) {
+    field.classList.add("invalid");
+    $("nameInput").setAttribute("aria-invalid", "true");
+    $("nameError").textContent = "Enter your first name to continue.";
+    $("nameInput").focus();
+    return;
+  }
+  try { localStorage.setItem("buffetsense_name", name); } catch (e) {}
+  $("greeting").textContent = `Welcome, ${name}!`;
+  show(2);
+}
+
+$("nextBtn").addEventListener("click", submitName);
+$("nameInput").addEventListener("keydown", (e) => { if (e.key === "Enter") submitName(); });
+$("nameInput").addEventListener("input", () => {
+  $("nameField").classList.remove("invalid");
+  $("nameInput").removeAttribute("aria-invalid");
+  $("nameError").textContent = "";
+});
+
+$("startBtn").addEventListener("click", () => { window.location.href = "dashboard.html"; });
+</script>
+</body>
+</html>
