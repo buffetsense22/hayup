@@ -5,93 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <link rel="stylesheet" href="styles.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-<title>Feedback · BuffetSense</title>
+<title>About · BuffetSense</title>
 </head>
-<body data-page="feedback">
+<body data-page="about">
 <div class="app shell">
   <main class="page">
-    <section>
-      <h1>How was your meal?</h1>
-      <p>Rate it and tell us what you thought.</p>
-    </section>
-
-    <div class="stack">
-      <div class="star-row" id="stars" role="radiogroup" aria-label="Rating"></div>
-      <div class="field">
-        <label for="nameInput">Name (optional)</label>
-        <input type="text" id="nameInput" autocomplete="given-name" />
-      </div>
-      <div class="field" id="msgField">
-        <label for="feedbackInput">Your feedback</label>
-        <textarea id="feedbackInput" aria-describedby="msgError"></textarea>
-        <p class="field-error" id="msgError" role="alert"></p>
-      </div>
-      <label class="check"><input type="checkbox" id="anonCheck" /> Post anonymously</label>
-      <button class="btn btn-primary" id="submitBtn">Submit review</button>
-    </div>
-
-    <section class="stack" aria-labelledby="recent">
-      <h2 id="recent" style="font-size:var(--fs-lg)">Recent reviews</h2>
-      <div class="stack" id="reviews">
-        <article class="review"><div class="who"><span>John D.</span><span class="stars-readout">★★★★★</span></div><p>The seafood section was amazing!</p></article>
-        <article class="review"><div class="who"><span>Emma W.</span><span class="stars-readout">★★★★☆</span></div><p>Loved the gluten-free options!</p></article>
-      </div>
-    </section>
+    <h1>About BuffetSense</h1>
+    <p>BuffetSense is a smart buffet management system. It helps restaurants track food in real time, collect guest feedback and cut food waste.</p>
+    <p>Guests get clear dish information. Managers get data to make better decisions.</p>
+    <a class="staff-link" href="otp-backend/public/verify.html">Staff sign in</a>
   </main>
 </div>
-<div class="toast" id="toast" role="status" hidden>Thanks for your review</div>
 <script src="app.js"></script>
-<script>
-  let rating = 5;
-  const starsEl = document.getElementById("stars");
-  for (let i = 1; i <= 5; i++) {
-    const b = document.createElement("button");
-    b.type = "button"; b.className = "star"; b.textContent = "★";
-    b.setAttribute("role", "radio"); b.setAttribute("aria-label", i + (i === 1 ? " star" : " stars"));
-    b.addEventListener("click", () => { rating = i; paint(); });
-    starsEl.appendChild(b);
-  }
-  function paint() {
-    [...starsEl.children].forEach((b, i) => {
-      b.classList.toggle("on", i < rating);
-      b.setAttribute("aria-checked", i + 1 === rating);
-    });
-  }
-  paint();
-
-  const msg = document.getElementById("feedbackInput");
-  msg.addEventListener("input", () => {
-    document.getElementById("msgField").classList.remove("invalid");
-    document.getElementById("msgError").textContent = "";
-  });
-
-  document.getElementById("submitBtn").addEventListener("click", () => {
-    const text = msg.value.trim();
-    if (!text) {
-      document.getElementById("msgField").classList.add("invalid");
-      document.getElementById("msgError").textContent = "Write a short comment before submitting.";
-      msg.focus();
-      return;
-    }
-    const anon = document.getElementById("anonCheck").checked;
-    const name = anon ? "Anonymous" : (document.getElementById("nameInput").value.trim() || "Guest");
-
-    // Built with textContent so guest input can never run as HTML
-    const card = document.createElement("article"); card.className = "review";
-    const who = document.createElement("div"); who.className = "who";
-    const n = document.createElement("span"); n.textContent = name;
-    const s = document.createElement("span"); s.className = "stars-readout";
-    s.textContent = "★".repeat(rating) + "☆".repeat(5 - rating);
-    who.append(n, s);
-    const p = document.createElement("p"); p.textContent = text;
-    card.append(who, p);
-    document.getElementById("reviews").prepend(card);
-
-    msg.value = ""; document.getElementById("nameInput").value = "";
-    document.getElementById("anonCheck").checked = false; rating = 5; paint();
-    const t = document.getElementById("toast"); t.hidden = false;
-    setTimeout(() => { t.hidden = true; }, 2500);
-  });
-</script>
 </body>
 </html>
