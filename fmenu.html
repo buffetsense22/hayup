@@ -5,79 +5,53 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <link rel="stylesheet" href="styles.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
 <title>Menu · BuffetSense</title>
 </head>
 <body data-page="menu">
 <div class="app shell">
   <main class="page">
-    <section>
-      <h1>Today’s buffet</h1>
-      <p>Tap a dish to see its details.</p>
-    </section>
+    <h1>Today’s buffet</h1>
+    <input class="search" id="q" type="search" placeholder="Search dishes" aria-label="Search dishes" autocomplete="off" />
     <div class="chips" id="chips" role="group" aria-label="Filter by category"></div>
+    <label class="check"><input type="checkbox" id="safe" /> Hide dishes with my allergens</label>
     <ul class="dish-list" id="list"></ul>
   </main>
 </div>
-
-<dialog class="sheet" id="sheet" aria-labelledby="sheetTitle">
-  <img id="sheetImg" src="" alt="" />
-  <h2 id="sheetTitle"></h2>
-  <dl class="facts" id="sheetFacts"></dl>
-  <button class="btn btn-primary" id="closeBtn" style="margin-top:var(--s3)">Close</button>
-</dialog>
-
+<script src="data.js"></script>
 <script src="app.js"></script>
 <script>
-  // Add kcal / allergens / ingredients per dish as you collect them.
-  const DISHES = [
-    { n: "Grilled Chicken Inasal", f: "grilled_chicken", c: "Grilled & meat", kcal: 320, allergens: "None", ingredients: "Chicken, olive oil, lemon, herbs" },
-    { n: "Lechon Kawali", f: "lechon_kawali", c: "Grilled & meat" },
-    { n: "Pork Sisig", f: "pork_sisig", c: "Grilled & meat" },
-    { n: "Kare-Kare", f: "kare_kare", c: "Grilled & meat" },
-    { n: "Beef Caldereta", f: "beef_caldereta", c: "Grilled & meat" },
-    { n: "Chicken Adobo", f: "chicken_adobo", c: "Grilled & meat" },
-    { n: "Sinigang na Baboy", f: "sinigang_na_baboy", c: "Soups & stews" },
-    { n: "Bulalo", f: "bulalo", c: "Soups & stews" },
-    { n: "Pancit Bihon", f: "pancit_bihon", c: "Rice & noodles" },
-    { n: "Leche Flan", f: "leche_flan", c: "Desserts" },
-    { n: "Halo-Halo Station", f: "halo_halo", c: "Desserts" },
-  ];
-  const cats = ["All", ...new Set(DISHES.map(d => d.c))];
-  let active = "All";
-  const chips = document.getElementById("chips"), list = document.getElementById("list");
-  const sheet = document.getElementById("sheet");
+  const cats = ["All", "Favorites", ...new Set(DISHES.map((d) => d.c))];
+  let cat = "All";
+  $("#q").addEventListener("input", render);
+  $("#safe").addEventListener("change", render);
+
+  function row(d) {
+    const li = el("li", "dish-row");
+    const a = el("a", "dish-link"); a.href = "dish-details.html?id=" + d.id;
+    const img = el("img"); img.src = d.img; img.alt = ""; img.loading = "lazy";
+    const info = el("div", "dish-info"); info.append(el("strong", "", d.n));
+    const c = conflicts(d);
+    info.append(c.length ? el("span", "warn", "Contains " + c.join(", ")) : el("span", "", d.kcal + " kcal · " + d.c));
+    a.append(img, info);
+    const fav = favs().includes(d.id);
+    const fb = iconBtn((fav ? "fas fa-heart fav-on" : "far fa-heart"), fav ? "Remove from favorites" : "Add to favorites", () => { toggleFav(d.id); render(); });
+    const ab = iconBtn("fas fa-plus", "Add " + d.n + " to plate", () => { addToPlate(d.id); toast("Added to plate"); });
+    li.append(a, fb, ab);
+    return li;
+  }
 
   function render() {
-    chips.replaceChildren(...cats.map(c => {
-      const b = document.createElement("button");
-      b.className = "chip"; b.textContent = c; b.setAttribute("aria-pressed", c === active);
-      b.onclick = () => { active = c; render(); };
-      return b;
+    $("#chips").replaceChildren(...cats.map((c) => {
+      const b = el("button", "chip", c); b.type = "button"; b.setAttribute("aria-pressed", c === cat);
+      b.onclick = () => { cat = c; render(); }; return b;
     }));
-    list.replaceChildren(...DISHES.filter(d => active === "All" || d.c === active).map(d => {
-      const li = document.createElement("li");
-      const b = document.createElement("button"); b.className = "dish-btn";
-      const img = document.createElement("img"); img.src = "images/" + d.f + ".jpg"; img.alt = ""; img.loading = "lazy";
-      const t = document.createElement("span"); t.textContent = d.n;
-      b.append(img, t); b.onclick = () => open(d); li.append(b); return li;
-    }));
+    const term = $("#q").value.trim().toLowerCase(), safe = $("#safe").checked, f = favs();
+    const rows = DISHES.filter((d) =>
+      (cat === "All" || (cat === "Favorites" ? f.includes(d.id) : d.c === cat)) &&
+      d.n.toLowerCase().includes(term) && !(safe && conflicts(d).length));
+    $("#list").replaceChildren(...(rows.length ? rows.map(row) : [el("li", "empty", "No dishes match.")]));
   }
-
-  function open(d) {
-    document.getElementById("sheetImg").src = "images/" + d.f + ".jpg";
-    document.getElementById("sheetTitle").textContent = d.n;
-    const rows = [["Category", d.c], ["Calories", d.kcal ? d.kcal + " kcal" : "Not added yet"],
-                  ["Allergens", d.allergens || "Not added yet"], ["Ingredients", d.ingredients || "Not added yet"]];
-    document.getElementById("sheetFacts").replaceChildren(...rows.map(([k, v]) => {
-      const row = document.createElement("div");
-      const dt = document.createElement("dt"); dt.textContent = k;
-      const dd = document.createElement("dd"); dd.textContent = v;
-      row.append(dt, dd); return row;
-    }));
-    sheet.showModal();
-  }
-  document.getElementById("closeBtn").onclick = () => sheet.close();
-  sheet.addEventListener("click", e => { if (e.target === sheet) sheet.close(); });
   render();
 </script>
 </body>
