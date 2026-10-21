@@ -59,6 +59,7 @@
 </main>
 
 <script>
+try { if (localStorage.getItem("buffetsense_name")) location.replace("dashboard.html"); } catch (e) {}
 const $ = (id) => document.getElementById(id);
 const steps = ["step-welcome", "step-name", "step-final"];
 const progress = [33, 66, 100];
