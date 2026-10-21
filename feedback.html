@@ -5,17 +5,69 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <link rel="stylesheet" href="styles.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-<title>About · BuffetSense</title>
+
+<title>Reviews · BuffetSense</title>
 </head>
-<body data-page="about">
+<body data-page="feedback">
 <div class="app shell">
   <main class="page">
-    <h1>About BuffetSense</h1>
-    <p>BuffetSense is a smart buffet management system. It helps restaurants track food in real time, collect guest feedback and cut food waste.</p>
-    <p>Guests get clear dish information. Managers get data to make better decisions.</p>
-    <a class="staff-link" href="otp-backend/public/verify.html">Staff sign in</a>
+    <section><h1>Reviews</h1><p id="summary"></p></section>
+    <div class="stack">
+      <div class="field"><label for="dishSel">Dish</label><select class="search" id="dishSel"></select></div>
+      <div class="star-row" id="stars" role="radiogroup" aria-label="Rating"></div>
+      <div class="field"><label for="nameInput">Name (optional)</label><input type="text" id="nameInput" autocomplete="given-name" /></div>
+      <div class="field" id="msgField">
+        <label for="text">Your feedback</label>
+        <textarea id="text" aria-describedby="msgError"></textarea>
+        <p class="field-error" id="msgError" role="alert"></p>
+      </div>
+      <label class="check"><input type="checkbox" id="anon" /> Post anonymously</label>
+      <button class="btn btn-primary" id="submit" type="button">Submit review</button>
+    </div>
+    <h2 style="font-size:var(--fs-lg);margin:var(--s3) 0 0">Recent reviews</h2>
+    <select class="search" id="filter" aria-label="Filter reviews by dish"></select>
+    <div class="stack" id="list"></div>
   </main>
 </div>
+<script src="data.js"></script>
 <script src="app.js"></script>
+<script>
+  let rating = 5;
+  const opts = (sel, first) => {
+    sel.append(new Option(first, ""));
+    DISHES.forEach((d) => sel.append(new Option(d.n, d.id)));
+  };
+  opts($("#dishSel"), "General (whole buffet)"); opts($("#filter"), "All dishes");
+  const pre = new URLSearchParams(location.search).get("dish");
+  if (pre && dish(pre)) $("#dishSel").value = pre;
+  $("#nameInput").value = userName();
+
+  for (let i = 1; i <= 5; i++) {
+    const b = el("button", "star", "★"); b.type = "button";
+    b.setAttribute("role", "radio"); b.setAttribute("aria-label", i + (i === 1 ? " star" : " stars"));
+    b.onclick = () => { rating = i; paint(); }; $("#stars").append(b);
+  }
+  function paint() { [...$("#stars").children].forEach((b, i) => { b.classList.toggle("on", i < rating); b.setAttribute("aria-checked", i + 1 === rating); }); }
+  paint();
+  $("#text").addEventListener("input", () => { $("#msgField").classList.remove("invalid"); $("#msgError").textContent = ""; });
+
+  function render() {
+    const all = reviews();
+    $("#summary").textContent = all.length ? `${avg(all).toFixed(1)} / 5 from ${all.length} review(s)` : "No reviews yet. Be the first.";
+    const f = $("#filter").value, rows = all.filter((r) => !f || r.dish === f).sort((a, b) => b.ts - a.ts);
+    $("#list").replaceChildren(...(rows.length ? rows.map((r) => reviewCard(r, (id) => { S.set("reviews", reviews().filter((x) => x.id !== id)); render(); })) : [el("p", "empty", "Nothing here yet.")]));
+  }
+  $("#filter").onchange = render;
+
+  $("#submit").onclick = () => {
+    const text = $("#text").value.trim();
+    if (!text) { $("#msgField").classList.add("invalid"); $("#msgError").textContent = "Write a short comment before submitting."; $("#text").focus(); return; }
+    const name = $("#anon").checked ? "Anonymous" : $("#nameInput").value.trim() || "Guest";
+    const all = reviews(); all.push({ id: Date.now(), dish: $("#dishSel").value, name, rating, text, ts: Date.now() });
+    S.set("reviews", all);
+    $("#text").value = ""; $("#anon").checked = false; rating = 5; paint(); render(); toast("Thanks for your review");
+  };
+  render();
+</script>
 </body>
 </html>
