@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<title>Profile · BuffetSense</title>
+</head>
+<body data-page="profile">
+<div class="app shell">
+  <main class="page">
+    <h1>Profile</h1>
+    <div class="field"><label for="name">First name</label><input id="name" type="text" autocomplete="given-name" /></div>
+    <fieldset style="border:0;padding:0;margin:0">
+      <legend style="font-weight:600;font-size:var(--fs-sm);margin-bottom:var(--s2)">Allergens to avoid</legend>
+      <div class="grid-checks" id="al"></div>
+    </fieldset>
+    <div class="field"><label for="goal">Calorie goal for this meal</label><input id="goal" type="number" min="100" max="3000" step="50" inputmode="numeric" /></div>
+    <button class="btn btn-primary" id="save" type="button">Save</button>
+    <button class="btn btn-ghost" id="reset" type="button">Reset all my data</button>
+    <p class="note"><a href="about.html">About BuffetSense</a> · <a class="staff-link" href="otp-backend/public/verify.html">Staff sign in</a></p>
+  </main>
+</div>
+<script src="data.js"></script>
+<script src="app.js"></script>
+<script>
+  const p = profile();
+  $("#name").value = userName(); $("#goal").value = p.goal;
+  $("#al").replaceChildren(...ALLERGENS.map((a) => {
+    const l = el("label", "check"), i = el("input"); i.type = "checkbox"; i.value = a; i.checked = p.allergens.includes(a);
+    l.append(i, a); return l;
+  }));
+  $("#save").onclick = () => {
+    const goal = Math.min(3000, Math.max(100, parseInt($("#goal").value, 10) || 700));
+    S.set("profile", { allergens: [...document.querySelectorAll("#al input:checked")].map((i) => i.value), goal });
+    try { localStorage.setItem("buffetsense_name", $("#name").value.trim()); } catch (e) {}
+    $("#goal").value = goal; toast("Saved");
+  };
+  $("#reset").onclick = () => {
+    if (!confirm("Delete your profile, plate, favorites and reviews on this device?")) return;
+    try { Object.keys(localStorage).filter((k) => k.startsWith("bs_") || k === "buffetsense_name").forEach((k) => localStorage.removeItem(k)); } catch (e) {}
+    location.href = "index.html";
+  };
+</script>
+</body>
+</html>
