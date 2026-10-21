@@ -5,30 +5,55 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <link rel="stylesheet" href="styles.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-<title>Grilled Chicken Breast · BuffetSense</title>
+
+<title>Dish · BuffetSense</title>
 </head>
-<body data-page="scan" data-back="menu.html">
-<div class="app shell">
-  <main class="page">
-    <img class="hero-img" src="grilled-chicken.jpg" alt="Grilled chicken breast" />
-    <div>
-      <h1>Grilled Chicken Breast</h1>
-      <div class="meta-row">
-        <span class="stars-readout"><i class="fas fa-star"></i> 4.8</span>
-        <span class="badge">320 kcal</span>
-      </div>
-    </div>
-    <dl class="facts">
-      <div><dt>Allergens</dt><dd>None</dd></div>
-      <div><dt>Ingredients</dt><dd>Chicken, olive oil, lemon, herbs</dd></div>
-    </dl>
-    <div class="meta-row" aria-label="Dietary tags">
-      <span class="badge">Nut-free</span>
-      <span class="badge">Gluten-free</span>
-      <span class="badge">Dairy-free</span>
-    </div>
-  </main>
-</div>
+<body data-page="menu" data-back="fmenu.html">
+<div class="app shell"><main class="page" id="page"></main></div>
+<script src="data.js"></script>
 <script src="app.js"></script>
+<script>
+  const d = dish(new URLSearchParams(location.search).get("id"));
+  const page = $("#page");
+  if (!d) {
+    page.append(el("h1", "", "Dish not found"));
+    const a = el("a", "btn btn-primary", "Back to menu"); a.href = "fmenu.html"; page.append(a);
+  } else {
+    document.title = d.n + " · BuffetSense";
+    const img = el("img", "hero-img"); img.src = d.img; img.alt = d.n;
+    const rs = reviews().filter((r) => r.dish === d.id);
+    const head = el("div"); head.append(el("h1", "", d.n));
+    const meta = el("div", "meta-row");
+    meta.append(el("span", "badge", d.kcal + " kcal"), el("span", "badge", d.c),
+      el("span", "stars-readout", rs.length ? "★ " + avg(rs).toFixed(1) + " (" + rs.length + ")" : "No ratings yet"));
+    head.append(meta);
+    page.append(img, head);
+
+    const c = conflicts(d);
+    if (c.length) {
+      const al = el("div", "alert"); al.setAttribute("role", "alert");
+      al.append(el("strong", "", "Heads up"), el("span", "", "Contains " + c.join(", ") + ", which is on your allergen list."));
+      page.append(al);
+    }
+    const facts = el("dl", "facts");
+    [["Allergens", d.al.length ? d.al.join(", ") : "None listed"], ["Ingredients", d.ing]].forEach(([k, v]) => {
+      const r = el("div"); r.append(el("dt", "", k), el("dd", "", v)); facts.append(r);
+    });
+    page.append(facts, el("p", "note", "Nutrition and allergen info are estimates. Always confirm with staff if you have a serious allergy."));
+
+    const add = el("button", "btn btn-primary", "Add to plate"); add.type = "button";
+    add.onclick = () => { addToPlate(d.id); toast("Added to plate"); };
+    const fav = el("button", "btn btn-ghost"); fav.type = "button";
+    const paintFav = () => (fav.textContent = favs().includes(d.id) ? "♥ Saved to favorites" : "♡ Save to favorites");
+    fav.onclick = () => { toggleFav(d.id); paintFav(); }; paintFav();
+    const rev = el("a", "btn btn-ghost", "Write a review"); rev.href = "feedback.html?dish=" + d.id;
+    page.append(add, fav, rev);
+
+    if (rs.length) {
+      page.append(el("h2", "", "Reviews"));
+      rs.slice(0, 3).forEach((r) => page.append(reviewCard(r)));
+    }
+  }
+</script>
 </body>
 </html>
