@@ -5,26 +5,63 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <link rel="stylesheet" href="styles.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-<title>Scan dish · BuffetSense</title>
+
+<title>Scan · BuffetSense</title>
 </head>
 <body data-page="scan">
 <div class="app shell">
   <main class="page">
-    <section>
-      <h1>Scan a dish</h1>
-      <p>Point at a dish to see calories, allergens and ingredients.</p>
-    </section>
-    <div class="scanner">
-      <img src="grilled-chicken.jpg" alt="Dish being scanned" />
+    <section><h1>Scan a dish</h1><p>Scan the QR code next to a dish, or search for it below.</p></section>
+    <div class="scanner" id="box" hidden>
+      <video id="vid" playsinline muted style="display:block;width:100%;aspect-ratio:1;object-fit:cover"></video>
       <div class="scan-line" aria-hidden="true"></div>
     </div>
-    <a class="card result-card" href="dish-details.html">
-      <img src="grilled-chicken.jpg" alt="" />
-      <div class="grow"><strong>Grilled Chicken</strong><span>About 320 kcal</span></div>
-      <i class="fas fa-chevron-right" aria-hidden="true"></i>
-    </a>
+    <button class="btn btn-primary" id="cam" type="button"><i class="fas fa-camera"></i>&nbsp; Start camera</button>
+    <p class="field-error" id="msg" role="status"></p>
+    <input class="search" id="find" type="search" placeholder="Find a dish" aria-label="Find a dish" autocomplete="off" />
+    <ul class="dish-list" id="res"></ul>
   </main>
 </div>
+<script src="data.js"></script>
 <script src="app.js"></script>
+<script>
+  let stream, timer;
+  const stop = () => { clearInterval(timer); if (stream) stream.getTracks().forEach((t) => t.stop()); };
+  addEventListener("pagehide", stop);
+
+  $("#cam").onclick = async () => {
+    const msg = $("#msg"); msg.textContent = "";
+    if (!("BarcodeDetector" in window) || !navigator.mediaDevices) {
+      msg.textContent = "QR scanning isn’t supported in this browser. Use the search below."; return;
+    }
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+      $("#vid").srcObject = stream; await $("#vid").play(); $("#box").hidden = false;
+      const det = new BarcodeDetector({ formats: ["qr_code"] });
+      timer = setInterval(async () => {
+        try {
+          const codes = await det.detect($("#vid"));
+          if (!codes.length) return;
+          let v = codes[0].rawValue.trim();
+          try { v = new URL(v).searchParams.get("id") || v; } catch (e) {}
+          if (dish(v)) { stop(); location.href = "dish-details.html?id=" + v; }
+          else msg.textContent = "That QR code isn’t a BuffetSense dish.";
+        } catch (e) {}
+      }, 400);
+    } catch (e) { msg.textContent = "Camera access was blocked. Allow it in your browser settings or use search."; }
+  };
+
+  function show() {
+    const t = $("#find").value.trim().toLowerCase();
+    const rows = DISHES.filter((d) => d.n.toLowerCase().includes(t));
+    $("#res").replaceChildren(...(rows.length ? rows.map((d) => {
+      const li = el("li"); const a = el("a", "dish-row dish-link"); a.href = "dish-details.html?id=" + d.id;
+      const img = el("img"); img.src = d.img; img.alt = "";
+      const info = el("div", "dish-info"); info.append(el("strong", "", d.n), el("span", "", d.kcal + " kcal"));
+      a.append(img, info); li.append(a); return li;
+    }) : [el("li", "empty", "No dishes match.")]));
+  }
+  $("#find").addEventListener("input", show); show();
+</script>
 </body>
 </html>
