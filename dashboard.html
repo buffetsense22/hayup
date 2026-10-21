@@ -5,46 +5,57 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <link rel="stylesheet" href="styles.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
 <title>Home · BuffetSense</title>
 </head>
 <body data-page="home">
 <div class="app shell">
   <main class="page">
-    <section>
-      <h1 id="hello">Welcome back</h1>
-      <p>Here’s how the buffet is doing today.</p>
+    <section><h1 id="hello">Welcome</h1><p>Your buffet at a glance.</p></section>
+
+    <section class="card card-body" id="setup" hidden>
+      <h2 style="font-size:var(--fs-lg)">Set your allergens</h2>
+      <p>Get warnings on any dish that contains something you avoid.</p>
+      <a class="btn btn-primary" href="profile.html">Set up profile</a>
     </section>
 
-    <section class="tiles" aria-label="Buffet overview">
-      <div class="tile"><span class="label">Live dishes</span><span class="value">24</span></div>
-      <div class="tile"><span class="label">Satisfaction</span><span class="value">4 / 5</span></div>
-      <div class="tile"><span class="label">Meals served</span><span class="value">356</span></div>
-      <div class="tile"><span class="label">Waste reduced</span><span class="value">12.3 kg</span></div>
-      <div class="tile wide"><span class="label">Top dish</span><span class="value">Grilled Chicken</span></div>
+    <section class="tiles">
+      <div class="tile"><span class="label">Dishes today</span><span class="value" id="tDishes"></span></div>
+      <div class="tile"><span class="label">My favorites</span><span class="value" id="tFavs"></span></div>
+      <div class="tile"><span class="label">Reviews</span><span class="value" id="tRevs"></span></div>
+      <div class="tile"><span class="label">Avg rating</span><span class="value" id="tAvg"></span></div>
     </section>
 
-    <section class="card card-body">
-      <h2 style="font-size:var(--fs-lg)">Notifications</h2>
-      <ul class="notice-list">
-        <li><i class="fas fa-triangle-exclamation"></i> Low stock: Leche Flan</li>
-        <li><i class="fas fa-comment"></i> New feedback: “Loved the adobo!”</li>
-      </ul>
+    <section class="card card-body stack">
+      <h2 style="font-size:var(--fs-lg);margin:0">My plate</h2>
+      <p id="plateText" style="margin:0"></p>
+      <div class="progress"><div class="progress-fill" id="plateBar"></div></div>
+      <a class="btn btn-ghost" href="plate.html">Open plate</a>
     </section>
 
-    <section class="quick" aria-label="Quick actions">
-      <a href="fmenu.html"><i class="fas fa-utensils"></i>View menu</a>
-      <a href="menu.html"><i class="fas fa-camera"></i>Scan dish</a>
-      <a href="feedback.html"><i class="fas fa-comment-medical"></i>Give feedback</a>
+    <section class="quick">
+      <a href="fmenu.html"><i class="fas fa-utensils"></i>Browse menu</a>
+      <a href="menu.html"><i class="fas fa-qrcode"></i>Scan dish</a>
+      <a href="feedback.html"><i class="fas fa-comment-medical"></i>Review</a>
     </section>
   </main>
 </div>
+<script src="data.js"></script>
 <script src="app.js"></script>
 <script>
-  try {
-    const n = localStorage.getItem("buffetsense_name");
-    if (n) document.getElementById("hello").textContent = "Welcome back, " + n;
-  } catch (e) {}
+  const n = userName();
+  $("#hello").textContent = n ? "Welcome back, " + n : "Welcome";
+  $("#setup").hidden = !!S.get("profile", null);
+  const revs = reviews();
+  $("#tDishes").textContent = DISHES.length;
+  $("#tFavs").textContent = favs().length;
+  $("#tRevs").textContent = revs.length;
+  $("#tAvg").textContent = revs.length ? avg(revs).toFixed(1) : "–";
+  const kcal = plateKcal(), goal = profile().goal;
+  $("#plateText").textContent = plateCount() ? `${kcal} of ${goal} kcal · ${plateCount()} item(s)` : "Nothing on your plate yet.";
+  const bar = $("#plateBar");
+  bar.style.width = Math.min(100, (kcal / goal) * 100) + "%";
+  if (kcal > goal) bar.classList.add("over");
 </script>
 </body>
 </html>
-
