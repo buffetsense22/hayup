@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<title>My plate · BuffetSense</title>
+</head>
+<body data-page="plate">
+<div class="app shell">
+  <main class="page">
+    <h1>My plate</h1>
+    <section class="card card-body stack">
+      <div class="meta-row" style="justify-content:space-between"><span>Total</span><strong id="total"></strong></div>
+      <div class="progress"><div class="progress-fill" id="bar"></div></div>
+      <p class="note" id="goalText" style="margin:0"></p>
+    </section>
+    <div class="stack" id="alerts"></div>
+    <ul class="dish-list" id="items"></ul>
+    <button class="btn btn-ghost" id="clear" type="button">Clear plate</button>
+  </main>
+</div>
+<script src="data.js"></script>
+<script src="app.js"></script>
+<script>
+  function render() {
+    const p = plate(), ids = Object.keys(p).filter(dish), goal = profile().goal, kcal = plateKcal();
+    $("#total").textContent = kcal + " kcal";
+    const bar = $("#bar"); bar.style.width = Math.min(100, (kcal / goal) * 100) + "%"; bar.classList.toggle("over", kcal > goal);
+    $("#goalText").textContent = kcal > goal ? `${kcal - goal} kcal over your ${goal} kcal goal` : `${goal - kcal} kcal left of your ${goal} kcal goal`;
+    $("#clear").hidden = !ids.length;
+
+    $("#alerts").replaceChildren(...ids.filter((id) => conflicts(dish(id)).length).map((id) => {
+      const a = el("div", "alert"); a.setAttribute("role", "alert");
+      a.append(el("strong", "", dish(id).n), el("span", "", "Contains " + conflicts(dish(id)).join(", ")));
+      return a;
+    }));
+
+    $("#items").replaceChildren(...(ids.length ? ids.map((id) => {
+      const d = dish(id), li = el("li", "dish-row");
+      const img = el("img"); img.src = d.img; img.alt = "";
+      const info = el("div", "dish-info"); info.style.flex = "1"; info.append(el("strong", "", d.n), el("span", "", d.kcal * p[id] + " kcal"));
+      const q = el("div", "qty");
+      q.append(iconBtn("fas fa-minus", "Remove one", () => { addToPlate(id, -1); render(); }), el("strong", "", p[id]),
+               iconBtn("fas fa-plus", "Add one", () => { addToPlate(id, 1); render(); }));
+      li.append(img, info, q); return li;
+    }) : [(() => { const e = el("li", "empty", "Your plate is empty. "); const a = el("a", "", "Browse the menu"); a.href = "fmenu.html"; e.append(a); return e; })()]));
+  }
+  $("#clear").onclick = () => { S.set("plate", {}); updateBadge(); render(); };
+  render();
+</script>
+</body>
+</html>
