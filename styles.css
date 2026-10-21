@@ -254,3 +254,26 @@ textarea:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 3p
 .toast[hidden] { display: none; }
 
 .staff-link { font-size: var(--fs-sm); color: var(--brown-soft); }
+
+/* ===== v3: functional UI ===== */
+.bottom-nav a { position: relative; }
+.dot { position: absolute; top: 2px; left: calc(50% + 6px); min-width: 18px; padding: 0 5px; font-size: 0.7rem; font-weight: 700; line-height: 18px; text-align: center; background: var(--green); color: var(--cream); border-radius: var(--r-pill); }
+.dot[hidden] { display: none; }
+.alert { padding: var(--s3); border-radius: var(--r-md); border: 1px solid var(--danger); background: color-mix(in srgb, var(--danger) 12%, var(--surface)); color: var(--brown); font-size: var(--fs-sm); }
+.alert strong { display: block; }
+.note { font-size: var(--fs-sm); color: var(--brown-soft); }
+.dish-row { display: flex; align-items: center; gap: var(--s2); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); padding: var(--s2); }
+.dish-link { flex: 1; display: flex; align-items: center; gap: var(--s3); min-width: 0; color: inherit; text-decoration: none; }
+.dish-link img, .dish-row > img { width: 56px; height: 56px; border-radius: var(--r-sm); object-fit: cover; flex: none; }
+.dish-info { display: grid; min-width: 0; }
+.dish-info span { font-size: var(--fs-sm); color: var(--brown-soft); }
+.dish-info .warn { color: var(--danger); font-weight: 600; }
+.qty { display: flex; align-items: center; gap: var(--s1); }
+.qty strong { min-width: 20px; text-align: center; }
+.search { width: 100%; min-height: 48px; padding: 0 var(--s3); font: inherit; color: var(--brown); background: var(--surface); border: 1.5px solid var(--line); border-radius: var(--r-md); }
+.search:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 3px var(--green-tint); }
+select.search { appearance: auto; }
+.over { background: var(--danger); }
+.fav-on { color: #d6336c; }
+.review .meta { font-size: var(--fs-sm); color: var(--brown-soft); display: flex; justify-content: space-between; align-items: center; }
+.grid-checks { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2); }
